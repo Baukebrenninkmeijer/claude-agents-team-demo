@@ -1,0 +1,40 @@
+## Team Setup Prompt
+
+Spawn a team of 3 agents to build a full-stack task manager app (TaskFlow) in parallel.
+
+### Team: "taskflow"
+
+### Agent 1: backend-dev
+Role: Backend developer
+Task: Build the complete FastAPI backend (SQLAlchemy + SQLite, Pydantic schemas, CRUD endpoints, filtering, sorting, CORS). Install deps in a venv and verify the app starts.
+
+### Agent 2: frontend-dev
+Role: Frontend developer
+Task: Build the React + Vite + Tailwind frontend (TaskList, TaskItem, TaskForm, FilterBar components, useTasks hook, API client). Scaffold with Vite, install deps, verify dev server starts.
+
+### Agent 3: test-writer
+Role: Test engineer
+Task: Write pytest tests for the backend API once it's built (blocked by backend-dev). Then write a polished README.md once all tasks are done (blocked by all).
+
+### Task Dependencies
+- Task #1 (backend) and #2 (frontend) run in parallel
+- Task #3 (tests) is blocked by #1
+- Task #4 (README) is blocked by #1, #2, #3
+
+### How to Run
+
+```
+# Create the team
+TeamCreate: team_name="taskflow"
+
+# Create tasks with dependencies
+TaskCreate: #1 "Build the FastAPI backend"
+TaskCreate: #2 "Build the React frontend"
+TaskCreate: #3 "Write backend API tests" (blockedBy: #1)
+TaskCreate: #4 "Write README and run final integration check" (blockedBy: #1, #2, #3)
+
+# Spawn agents (all in background, mode=auto, team_name=taskflow)
+Agent: name=backend-dev  → works on #1
+Agent: name=frontend-dev → works on #2
+Agent: name=test-writer  → waits for #1, then #3, then #4
+```
