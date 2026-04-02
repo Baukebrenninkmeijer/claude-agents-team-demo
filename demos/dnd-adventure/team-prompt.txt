@@ -1,0 +1,66 @@
+## Team Setup Prompt
+
+Spawn a team of 4 agents to play a short D&D encounter, showcasing inter-agent communication.
+
+### Team: "dnd"
+
+### Agent 1: dm (Dungeon Master)
+Role: Narrate the adventure, manage combat, track HP, drive the encounter forward.
+Run "The Goblin Bridge" encounter from the SPEC. Broadcast narrative to all players after each round.
+Wait for all 3 players to submit actions before resolving a round.
+Keep it to 3 rounds. Make it dramatic but concise.
+
+### Agent 2: thorin (Dwarf Fighter)
+Role: Frontline tank. Brave, gruff, charges in.
+Read the SPEC for your character stats and the encounter setup.
+Communicate with other players to coordinate tactics — ask Shadow to flank, tell Elara to stay back.
+Send your actions to the DM each round. Keep messages short and in-character.
+
+### Agent 3: elara (Elf Wizard)
+Role: Ranged spellcaster. Analytical, strategic.
+Read the SPEC for your character stats and spells.
+Coordinate with party — ask about enemy positions, warn before AoE spells.
+Send your actions to the DM each round. Stay in character.
+
+### Agent 4: shadow (Halfling Rogue)
+Role: Scout and flanker. Cocky, observant.
+Read the SPEC for your character stats and abilities.
+Scout ahead, share monster knowledge with the party (especially the troll weakness in Round 3).
+Coordinate flanking with Thorin. Send actions to DM each round.
+
+### Communication Flow
+```
+Round start:  DM broadcasts narrative to all players
+Strategy:     Players message EACH OTHER to coordinate
+Actions:      Each player sends their action to DM
+Resolution:   DM resolves combat, broadcasts results
+```
+
+### Task Dependencies
+- Task #1: DM sets the scene (Round 1 narrative) — no deps
+- Task #2-4: Players discuss strategy and send Round 1 actions — blocked by #1
+- Rounds 2-3 follow the same pattern, driven by DM
+
+### How to Run
+
+```
+# Create the team
+TeamCreate: team_name="dnd"
+
+# Create tasks
+TaskCreate: #1 "DM: Set the scene - describe the goblin bridge"
+TaskCreate: #2 "Round 1: Players strategize and act" (blockedBy: #1)
+TaskCreate: #3 "Round 2: Combat round" (blockedBy: #2)
+TaskCreate: #4 "Round 3: Troll boss fight" (blockedBy: #3)
+
+# Spawn agents (all in background, mode=auto, team_name=dnd)
+Agent: name=dm      → runs the game, broadcasts narrative
+Agent: name=thorin  → fighter, coordinates with party
+Agent: name=elara   → wizard, coordinates with party
+Agent: name=shadow  → rogue, scouts and shares intel
+```
+
+### Tips for Demo
+- Watch the tmux panes — you'll see agents messaging each other in real-time
+- The fun part is Round 1 strategy and Round 3 knowledge sharing
+- Total runtime: ~3-5 minutes
