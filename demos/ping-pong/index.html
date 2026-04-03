@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Pong</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: 'Courier New', monospace;
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+        #scoreboard {
+            display: flex;
+            gap: 60px;
+            margin-bottom: 20px;
+            font-size: 48px;
+            font-weight: bold;
+        }
+        #scoreboard span { min-width: 50px; text-align: center; }
+        .label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+        .score-group { text-align: center; }
+        canvas {
+            border: 2px solid #333;
+            border-radius: 4px;
+            display: block;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #aaa;
+            height: 24px;
+        }
+        #controls {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div id="scoreboard">
+        <div class="score-group">
+            <div class="label">Player</div>
+            <span id="playerScore">0</span>
+        </div>
+        <div class="score-group">
+            <div class="label">CPU</div>
+            <span id="cpuScore">0</span>
+        </div>
+    </div>
+    <canvas id="game" width="800" height="500"></canvas>
+    <div id="message">Press SPACE to start</div>
+    <div id="controls">W / S or Arrow Keys to move &mdash; SPACE to pause</div>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width;
+        const H = canvas.height;
+
+        const PADDLE_W = 12;
+        const PADDLE_H = 90;
+        const BALL_R = 8;
+        const PADDLE_SPEED = 6;
+        const BALL_SPEED_INIT = 5;
+        const BALL_SPEED_MAX = 12;
+        const WIN_SCORE = 7;
+
+        let playerScore = 0;
+        let cpuScore = 0;
+        let running = false;
+        let gameOver = false;
+
+        const player = { x: 20, y: H / 2 - PADDLE_H / 2, w: PADDLE_W, h: PADDLE_H, dy: 0 };
+        const cpu = { x: W - 20 - PADDLE_W, y: H / 2 - PADDLE_H / 2, w: PADDLE_W, h: PADDLE_H };
+        const ball = { x: W / 2, y: H / 2, r: BALL_R, dx: 0, dy: 0 };
+
+        const keys = {};
+
+        function resetBall(direction) {
+            ball.x = W / 2;
+            ball.y = H / 2;
+            const angle = (Math.random() * Math.PI / 3) - Math.PI / 6;
+            const speed = BALL_SPEED_INIT;
+            ball.dx = direction * speed * Math.cos(angle);
+            ball.dy = speed * Math.sin(angle);
+        }
+
+        function updateScoreboard() {
+            document.getElementById('playerScore').textContent = playerScore;
+            document.getElementById('cpuScore').textContent = cpuScore;
+        }
+
+        function setMessage(text) {
+            document.getElementById('message').textContent = text;
+        }
+
+        function update() {
+            // Player movement
+            player.dy = 0;
+            if (keys['ArrowUp'] || keys['w'] || keys['W']) player.dy = -PADDLE_SPEED;
+            if (keys['ArrowDown'] || keys['s'] || keys['S']) player.dy = PADDLE_SPEED;
+            player.y = Math.max(0, Math.min(H - PADDLE_H, player.y + player.dy));
+
+            // CPU AI - tracks ball with slight delay
+            const cpuCenter = cpu.y + PADDLE_H / 2;
+            const diff = ball.y - cpuCenter;
+            const cpuSpeed = 4.5;
+            if (Math.abs(diff) > 10) {
+                cpu.y += Math.sign(diff) * Math.min(cpuSpeed, Math.abs(diff));
+            }
+            cpu.y = Math.max(0, Math.min(H - PADDLE_H, cpu.y));
+
+            // Ball movement
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            // Top/bottom bounce
+            if (ball.y - ball.r <= 0) { ball.y = ball.r; ball.dy = Math.abs(ball.dy); }
+            if (ball.y + ball.r >= H) { ball.y = H - ball.r; ball.dy = -Math.abs(ball.dy); }
+
+            // Paddle collision - player
+            if (
+                ball.dx < 0 &&
+                ball.x - ball.r <= player.x + player.w &&
+                ball.x + ball.r >= player.x &&
+                ball.y >= player.y &&
+                ball.y <= player.y + player.h
+            ) {
+                ball.x = player.x + player.w + ball.r;
+                const hit = (ball.y - (player.y + PADDLE_H / 2)) / (PADDLE_H / 2);
+                const angle = hit * (Math.PI / 3);
+                const speed = Math.min(Math.hypot(ball.dx, ball.dy) + 0.3, BALL_SPEED_MAX);
+                ball.dx = speed * Math.cos(angle);
+                ball.dy = speed * Math.sin(angle);
+            }
+
+            // Paddle collision - CPU
+            if (
+                ball.dx > 0 &&
+                ball.x + ball.r >= cpu.x &&
+                ball.x - ball.r <= cpu.x + cpu.w &&
+                ball.y >= cpu.y &&
+                ball.y <= cpu.y + cpu.h
+            ) {
+                ball.x = cpu.x - ball.r;
+                const hit = (ball.y - (cpu.y + PADDLE_H / 2)) / (PADDLE_H / 2);
+                const angle = hit * (Math.PI / 3);
+                const speed = Math.min(Math.hypot(ball.dx, ball.dy) + 0.3, BALL_SPEED_MAX);
+                ball.dx = -speed * Math.cos(angle);
+                ball.dy = speed * Math.sin(angle);
+            }
+
+            // Scoring
+            if (ball.x - ball.r < 0) {
+                cpuScore++;
+                updateScoreboard();
+                if (cpuScore >= WIN_SCORE) { endGame('CPU wins!'); return; }
+                resetBall(1);
+            }
+            if (ball.x + ball.r > W) {
+                playerScore++;
+                updateScoreboard();
+                if (playerScore >= WIN_SCORE) { endGame('You win!'); return; }
+                resetBall(-1);
+            }
+        }
+
+        function draw() {
+            // Background
+            ctx.fillStyle = '#16213e';
+            ctx.fillRect(0, 0, W, H);
+
+            // Center line
+            ctx.setLineDash([8, 8]);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(W / 2, 0);
+            ctx.lineTo(W / 2, H);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Paddles
+            ctx.fillStyle = '#e94560';
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+            ctx.fillStyle = '#0f3460';
+            ctx.fillRect(cpu.x, cpu.y, cpu.w, cpu.h);
+
+            // Ball
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Ball trail glow
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.beginPath();
+            ctx.arc(ball.x - ball.dx, ball.y - ball.dy, ball.r + 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function gameLoop() {
+            if (!running) return;
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            if (gameOver) {
+                playerScore = 0;
+                cpuScore = 0;
+                updateScoreboard();
+                gameOver = false;
+            }
+            running = true;
+            setMessage('');
+            if (ball.dx === 0 && ball.dy === 0) resetBall(Math.random() < 0.5 ? 1 : -1);
+            gameLoop();
+        }
+
+        function endGame(msg) {
+            running = false;
+            gameOver = true;
+            setMessage(msg + ' Press SPACE to play again');
+        }
+
+        document.addEventListener('keydown', e => {
+            keys[e.key] = true;
+            if (e.key === ' ') {
+                e.preventDefault();
+                if (!running) startGame();
+                else { running = false; setMessage('Paused - SPACE to resume'); }
+            }
+        });
+        document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+        // Initial draw
+        resetBall(0);
+        ball.dx = 0;
+        ball.dy = 0;
+        draw();
+    </script>
+</body>
+</html>
