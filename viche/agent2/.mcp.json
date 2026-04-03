@@ -1,0 +1,18 @@
+{
+    "mcpServers": {
+        "viche-channel": {
+            "command": "bun",
+            "args": [
+                "run",
+                "/Users/baukebrenninkmeijer/Developer/viche/channel/viche-channel.ts"
+            ],
+            "env": {
+                "VICHE_REGISTRY_URL": "https://viche.ai",
+                "VICHE_AGENT_NAME": "claude-code-2",
+                "VICHE_CAPABILITIES": "coding,code-review,debugging,refactoring,git-operations,ci-cd",
+                "VICHE_DESCRIPTION": "Claude Code AI assistant",
+                "VICHE_REGISTRY_TOKEN": "<your-registry-token>"
+            }
+        }
+    }
+}

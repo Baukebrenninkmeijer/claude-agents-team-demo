@@ -1,0 +1,49 @@
+---
+marp: true
+theme: uncover
+paginate: false
+backgroundColor: #002b36
+color: #eee8d5
+---
+
+<style>
+section {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+h1 {
+  color: #2aa198;
+  font-size: 1.8em;
+  margin-bottom: 0.2em;
+}
+</style>
+
+# Who am I
+
+<div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 40px;">
+
+<div style="flex: 1.5; background: linear-gradient(135deg, #073642, #002b36); border-radius: 15px; padding: 25px; box-shadow: 0 6px 15px rgba(0,0,0,0.3);">
+
+### **Bauke Brenninkmeijer**
+
+- **Research Engineer** @ orq.ai
+- **CS** @ Radboud University
+- **6 Years Data Science** @ ABN AMRO & ING
+- **Organiser** @ MLOps Community Amsterdam
+
+</div>
+
+<div style="flex: 0.8; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+
+![w:250](img/headshot.jpg)
+
+<div style="background: white; padding: 10px; border-radius: 10px;">
+
+![w:150](img/linkedin_qr.png)
+
+</div>
+
+<small style="color: #2aa198;">Connect on LinkedIn</small>
+
+</div>
+
+</div>
