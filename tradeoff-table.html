@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Orchestration Tradeoffs</title>
+<style>
+  :root {
+    --orq-teal-light: #299D8F;
+    --orq-teal: #025558;
+    --orq-teal-dark: #01483d;
+    --orq-orange: #ff8f34;
+    --orq-orange-dark: #df5325;
+    --orq-ink: #25232e;
+    --orq-sand: #f9f8f6;
+    --orq-green: #2ebd85;
+    --orq-red: #d92d20;
+    --orq-yellow: #f2b600;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--orq-sand);
+    font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    color: var(--orq-ink);
+  }
+
+  .wrapper {
+    padding: 56px 64px;
+    width: 1200px;
+  }
+
+  .title {
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--orq-teal);
+    margin: 0 0 6px 0;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    font-size: 16px;
+    color: var(--orq-ink);
+    opacity: 0.65;
+    margin: 0 0 32px 0;
+    font-weight: 400;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 0 rgba(37, 35, 46, 0.06), 0 8px 24px rgba(37, 35, 46, 0.04);
+  }
+
+  thead th {
+    background: var(--orq-teal);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: left;
+    padding: 18px 22px;
+    letter-spacing: 0.01em;
+  }
+
+  thead th:first-child {
+    background: var(--orq-teal-dark);
+    width: 24%;
+  }
+
+  tbody td {
+    padding: 18px 22px;
+    font-size: 15px;
+    border-bottom: 1px solid rgba(37, 35, 46, 0.08);
+    vertical-align: top;
+    line-height: 1.45;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:nth-child(even) td {
+    background: rgba(41, 157, 143, 0.04);
+  }
+
+  .dim {
+    font-weight: 600;
+    color: var(--orq-teal-dark);
+  }
+
+  .good { color: var(--orq-green); font-weight: 600; }
+  .ok   { color: var(--orq-yellow); font-weight: 600; }
+  .warn { color: var(--orq-orange-dark); font-weight: 600; }
+  .bad  { color: var(--orq-red); font-weight: 600; }
+
+  .note {
+    font-size: 12px;
+    color: var(--orq-ink);
+    opacity: 0.55;
+    font-weight: 400;
+    display: block;
+    margin-top: 2px;
+  }
+
+  .footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--orq-ink);
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1 class="title">Agent Orchestration Tradeoffs</h1>
+    <p class="subtitle">Single agent vs. subagents (hub-and-spoke) vs. teams of agents (peer-to-peer)</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th>Single</th>
+          <th>Subagents</th>
+          <th>Teams</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="dim">Token cost</td>
+          <td><span class="good">1x</span></td>
+          <td><span class="ok">~1–2x</span><span class="note">cache-friendly</span></td>
+          <td><span class="bad">3–15x</span></td>
+        </tr>
+        <tr>
+          <td class="dim">Parallelism</td>
+          <td><span class="bad">None</span></td>
+          <td><span class="good">High</span><span class="note">cheap</span></td>
+          <td><span class="warn">High</span><span class="note">expensive</span></td>
+        </tr>
+        <tr>
+          <td class="dim">Coordination</td>
+          <td>N/A</td>
+          <td>Via parent only</td>
+          <td><span class="good">Peer-to-peer</span></td>
+        </tr>
+        <tr>
+          <td class="dim">Error propagation</td>
+          <td><span class="good">Contained</span></td>
+          <td><span class="good">Contained</span></td>
+          <td><span class="bad">Compounds up to 17.2x</span><span class="note">unstructured networks</span></td>
+        </tr>
+        <tr>
+          <td class="dim">Debuggability</td>
+          <td><span class="good">Easy</span></td>
+          <td><span class="ok">Medium</span></td>
+          <td><span class="bad">Hard</span><span class="note">N histories</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer">orq.ai</div>
+  </div>
+</body>
+</html>

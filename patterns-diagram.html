@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Agent Orchestration Patterns</title>
+<style>
+  :root {
+    --teal-light: #299D8F;
+    --teal: #025558;
+    --teal-dark: #01483d;
+    --orange: #ff8f34;
+    --orange-dark: #df5325;
+    --ink: #25232e;
+    --sand: #f9f8f6;
+    --muted: rgba(37, 35, 46, 0.55);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--sand);
+    font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+  }
+  .wrapper { padding: 48px 56px; width: 1400px; }
+  .title {
+    font-size: 32px; font-weight: 700;
+    color: var(--teal); margin: 0 0 4px 0;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    font-size: 15px; color: var(--ink); opacity: 0.65;
+    margin: 0 0 32px 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px 24px;
+    box-shadow: 0 1px 0 rgba(37, 35, 46, 0.06), 0 8px 24px rgba(37, 35, 46, 0.04);
+    display: flex; flex-direction: column;
+  }
+  .card-title {
+    font-size: 18px; font-weight: 700;
+    color: var(--teal-dark); margin: 0 0 2px 0;
+  }
+  .card-sub {
+    font-size: 12px; font-weight: 500;
+    color: var(--orange-dark); text-transform: uppercase;
+    letter-spacing: 0.08em; margin: 0 0 20px 0;
+  }
+  .diagram {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    min-height: 260px;
+  }
+  .card-body {
+    font-size: 13px; line-height: 1.5;
+    color: var(--ink); margin-top: 18px;
+  }
+  .card-body b { color: var(--teal-dark); font-weight: 600; }
+  .footer {
+    margin-top: 20px; font-size: 12px;
+    color: var(--ink); opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <h1 class="title">Three Agent Orchestration Patterns</h1>
+  <p class="subtitle">How coordination flows between agents — and who pays for it.</p>
+
+  <div class="grid">
+
+    <!-- Single -->
+    <div class="card">
+      <h2 class="card-title">Single Agent</h2>
+      <p class="card-sub">One loop · one context</p>
+      <div class="diagram">
+        <svg viewBox="0 0 320 260" width="100%">
+          <!-- tools/files around single agent -->
+          <defs>
+            <marker id="arr1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#025558"/>
+            </marker>
+          </defs>
+          <!-- agent -->
+          <circle cx="160" cy="130" r="42" fill="#025558"/>
+          <text x="160" y="135" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">agent</text>
+          <!-- tool nodes -->
+          <rect x="40" y="40" width="72" height="34" rx="6" fill="#fff" stroke="#299D8F" stroke-width="1.5"/>
+          <text x="76" y="62" text-anchor="middle" fill="#025558" font-size="12" font-weight="500">Bash</text>
+          <rect x="210" y="40" width="72" height="34" rx="6" fill="#fff" stroke="#299D8F" stroke-width="1.5"/>
+          <text x="246" y="62" text-anchor="middle" fill="#025558" font-size="12" font-weight="500">Read</text>
+          <rect x="40" y="186" width="72" height="34" rx="6" fill="#fff" stroke="#299D8F" stroke-width="1.5"/>
+          <text x="76" y="208" text-anchor="middle" fill="#025558" font-size="12" font-weight="500">Edit</text>
+          <rect x="210" y="186" width="72" height="34" rx="6" fill="#fff" stroke="#299D8F" stroke-width="1.5"/>
+          <text x="246" y="208" text-anchor="middle" fill="#025558" font-size="12" font-weight="500">Grep</text>
+          <!-- arrows: from box corner to agent edge -->
+          <line x1="112" y1="74" x2="133" y2="98" stroke="#025558" stroke-width="1.5" marker-end="url(#arr1)"/>
+          <line x1="210" y1="74" x2="188" y2="98" stroke="#025558" stroke-width="1.5" marker-end="url(#arr1)"/>
+          <line x1="112" y1="186" x2="133" y2="162" stroke="#025558" stroke-width="1.5" marker-end="url(#arr1)"/>
+          <line x1="210" y1="186" x2="188" y2="162" stroke="#025558" stroke-width="1.5" marker-end="url(#arr1)"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <b>Sequential tool calls.</b> One conversation, one window. Default choice — fits more work than people think.
+      </div>
+    </div>
+
+    <!-- Subagents -->
+    <div class="card">
+      <h2 class="card-title">Subagents</h2>
+      <p class="card-sub">Hub-and-spoke · cache-friendly</p>
+      <div class="diagram">
+        <svg viewBox="0 0 320 260" width="100%">
+          <defs>
+            <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#025558"/>
+            </marker>
+            <marker id="arr2r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#299D8F"/>
+            </marker>
+          </defs>
+          <!-- parent -->
+          <circle cx="160" cy="60" r="36" fill="#025558"/>
+          <text x="160" y="58" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">parent</text>
+          <text x="160" y="72" text-anchor="middle" fill="#fff" font-size="10">(hub)</text>
+          <!-- children -->
+          <circle cx="60" cy="200" r="28" fill="#ff8f34"/>
+          <text x="60" y="204" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">sub 1</text>
+          <circle cx="160" cy="200" r="28" fill="#ff8f34"/>
+          <text x="160" y="204" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">sub 2</text>
+          <circle cx="260" cy="200" r="28" fill="#ff8f34"/>
+          <text x="260" y="204" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">sub 3</text>
+          <!-- forks (down, solid teal) -->
+          <line x1="145" y1="92" x2="75" y2="175" stroke="#025558" stroke-width="2" marker-end="url(#arr2)"/>
+          <line x1="160" y1="98" x2="160" y2="170" stroke="#025558" stroke-width="2" marker-end="url(#arr2)"/>
+          <line x1="175" y1="92" x2="245" y2="175" stroke="#025558" stroke-width="2" marker-end="url(#arr2)"/>
+          <!-- returns (up, dashed light teal) -->
+          <line x1="80" y1="175" x2="150" y2="92" stroke="#299D8F" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arr2r)"/>
+          <line x1="165" y1="170" x2="165" y2="98" stroke="#299D8F" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arr2r)"/>
+          <line x1="240" y1="175" x2="170" y2="92" stroke="#299D8F" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arr2r)"/>
+          <!-- cache note -->
+          <text x="160" y="240" text-anchor="middle" fill="#df5325" font-size="10" font-weight="600">shared prompt cache</text>
+        </svg>
+      </div>
+      <div class="card-body">
+        <b>Fork, work, report back.</b> Byte-identical context means all forks hit cache. Parallelism is nearly free — but subs can't talk to each other.
+      </div>
+    </div>
+
+    <!-- Teams -->
+    <div class="card">
+      <h2 class="card-title">Team of Agents</h2>
+      <p class="card-sub">Peer-to-peer · full context each</p>
+      <div class="diagram">
+        <svg viewBox="0 0 320 260" width="100%">
+          <defs>
+            <marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#ff8f34"/>
+            </marker>
+          </defs>
+          <!-- four peers in a diamond -->
+          <circle cx="160" cy="50" r="30" fill="#025558"/>
+          <text x="160" y="54" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">agent A</text>
+          <circle cx="260" cy="130" r="30" fill="#025558"/>
+          <text x="260" y="134" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">agent B</text>
+          <circle cx="160" cy="210" r="30" fill="#025558"/>
+          <text x="160" y="214" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">agent C</text>
+          <circle cx="60" cy="130" r="30" fill="#025558"/>
+          <text x="60" y="134" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">agent D</text>
+          <!-- bi-directional edges -->
+          <line x1="183" y1="71" x2="237" y2="109" stroke="#ff8f34" stroke-width="1.8" marker-end="url(#arr3)"/>
+          <line x1="237" y1="109" x2="183" y2="71" stroke="#ff8f34" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+          <line x1="237" y1="151" x2="183" y2="189" stroke="#ff8f34" stroke-width="1.8" marker-end="url(#arr3)"/>
+          <line x1="183" y1="189" x2="237" y2="151" stroke="#ff8f34" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+          <line x1="137" y1="189" x2="83" y2="151" stroke="#ff8f34" stroke-width="1.8" marker-end="url(#arr3)"/>
+          <line x1="83" y1="151" x2="137" y2="189" stroke="#ff8f34" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+          <line x1="83" y1="109" x2="137" y2="71" stroke="#ff8f34" stroke-width="1.8" marker-end="url(#arr3)"/>
+          <line x1="137" y1="71" x2="83" y2="109" stroke="#ff8f34" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+          <!-- diagonals -->
+          <line x1="90" y1="130" x2="230" y2="130" stroke="#ff8f34" stroke-width="1.2" stroke-dasharray="3,3"/>
+          <line x1="160" y1="80" x2="160" y2="180" stroke="#ff8f34" stroke-width="1.2" stroke-dasharray="3,3"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <b>Direct messaging.</b> Independent context windows, shared task list. Peers challenge reasoning and reach consensus — at 3–15x the cost.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">orq.ai</div>
+</div>
+</body>
+</html>
